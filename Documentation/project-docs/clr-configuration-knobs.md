@@ -34,31 +34,30 @@ See also [Setting configuration variables](../building/viewing-jit-dumps.md#sett
 8. [Exception Handling Configuration Knobs](#exception-handling-configuration-knobs)
 9. [Garbage collector Configuration Knobs](#garbage-collector-configuration-knobs)
 10. [GDBJIT Configuration Knobs](#gdbjit-configuration-knobs)
-11. [IBC Configuration Knobs](#ibc-configuration-knobs)
-12. [Interop Configuration Knobs](#interop-configuration-knobs)
-13. [Interpreter Configuration Knobs](#interpreter-configuration-knobs)
-14. [JIT Configuration Knobs](#jit-configuration-knobs)
-15. [JIT Hardware Intrinsics Configuration Knobs](#jit-hardware-intrinsics-configuration-knobs)
-16. [Jit Pitching Configuration Knobs](#jit-pitching-configuration-knobs)
-17. [Loader Configuration Knobs](#loader-configuration-knobs)
-18. [Loader heap Configuration Knobs](#loader-heap-configuration-knobs)
-19. [Log Configuration Knobs](#log-configuration-knobs)
-20. [MetaData Configuration Knobs](#metadata-configuration-knobs)
-21. [Native Binder Configuration Knobs](#native-binder-configuration-knobs)
-22. [NGEN Configuration Knobs](#ngen-configuration-knobs)
-23. [Performance Configuration Knobs](#performance-configuration-knobs)
-24. [Profiling API / ETW Configuration Knobs](#profiling-api--etw-configuration-knobs)
-25. [Spinning heuristics Configuration Knobs](#spinning-heuristics-configuration-knobs)
-26. [Stress Configuration Knobs](#stress-configuration-knobs)
-27. [Thread (miscellaneous) Configuration Knobs](#thread-miscellaneous-configuration-knobs)
-28. [Thread Suspend Configuration Knobs](#thread-suspend-configuration-knobs)
-29. [Threadpool Configuration Knobs](#threadpool-configuration-knobs)
-30. [Tiered Compilation Configuration Knobs](#tiered-compilation-configuration-knobs)
-31. [TypeLoader Configuration Knobs](#typeloader-configuration-knobs)
-32. [Uncategorized Configuration Knobs](#uncategorized-configuration-knobs)
-33. [Virtual call stubs Configuration Knobs](#virtual-call-stubs-configuration-knobs)
-34. [Watson Configuration Knobs](#watson-configuration-knobs)
-35. [Zap Configuration Knobs](#zap-configuration-knobs)
+11. [Interop Configuration Knobs](#interop-configuration-knobs)
+12. [Interpreter Configuration Knobs](#interpreter-configuration-knobs)
+13. [JIT Configuration Knobs](#jit-configuration-knobs)
+14. [JIT Hardware Intrinsics Configuration Knobs](#jit-hardware-intrinsics-configuration-knobs)
+15. [Jit Pitching Configuration Knobs](#jit-pitching-configuration-knobs)
+16. [Loader Configuration Knobs](#loader-configuration-knobs)
+17. [Loader heap Configuration Knobs](#loader-heap-configuration-knobs)
+18. [Log Configuration Knobs](#log-configuration-knobs)
+19. [MetaData Configuration Knobs](#metadata-configuration-knobs)
+20. [Native Binder Configuration Knobs](#native-binder-configuration-knobs)
+21. [NGEN Configuration Knobs](#ngen-configuration-knobs)
+22. [Performance Configuration Knobs](#performance-configuration-knobs)
+23. [Profiling API / ETW Configuration Knobs](#profiling-api--etw-configuration-knobs)
+24. [Spinning heuristics Configuration Knobs](#spinning-heuristics-configuration-knobs)
+25. [Stress Configuration Knobs](#stress-configuration-knobs)
+26. [Thread (miscellaneous) Configuration Knobs](#thread-miscellaneous-configuration-knobs)
+27. [Thread Suspend Configuration Knobs](#thread-suspend-configuration-knobs)
+28. [Threadpool Configuration Knobs](#threadpool-configuration-knobs)
+29. [Tiered Compilation Configuration Knobs](#tiered-compilation-configuration-knobs)
+30. [TypeLoader Configuration Knobs](#typeloader-configuration-knobs)
+31. [Uncategorized Configuration Knobs](#uncategorized-configuration-knobs)
+32. [Virtual call stubs Configuration Knobs](#virtual-call-stubs-configuration-knobs)
+33. [Watson Configuration Knobs](#watson-configuration-knobs)
+34. [Zap Configuration Knobs](#zap-configuration-knobs)
 
 #### AppDomain Configuration Knobs
 
@@ -274,15 +273,6 @@ Name | Description | Type | Class | Default Value | Flags
 -----|-------------|------|-------|---------------|-------
 `GDBJitElfDump` | Dump ELF for specified method | `STRING` | `INTERNAL` | |
 `GDBJitEmitDebugFrame` | Enable .debug_frame generation | `DWORD` | `INTERNAL` | `TRUE` |
-
-#### IBC Configuration Knobs
-
-Name | Description | Type | Class | Default Value | Flags
------|-------------|------|-------|---------------|-------
-`ConvertIbcData` | Converts between v1 and v2 IBC data | `DWORD` | `UNSUPPORTED` | `1` | REGUTIL_default
-`DisableHotCold` | Master hot/cold splitting switch in Jit64 | `DWORD` | `UNSUPPORTED` | |
-`DisableIBC` | Disables the use of IBC data | `DWORD` | `UNSUPPORTED` | `0` | REGUTIL_default
-`UseIBCFile` |  | `DWORD` | `EXTERNAL` | `0` | REGUTIL_default
 
 #### Interop Configuration Knobs
 
@@ -911,8 +901,8 @@ Name | Description | Type | Class | Default Value | Flags
 `ReadyToRun` | Enable/disable use of ReadyToRun native code | `DWORD` | `EXTERNAL` | `1` |
 `ReadyToRunExcludeList` | List of assemblies that cannot use Ready to Run images | `STRING` | `EXTERNAL` | |
 `ReadyToRunLogFile` | Name of file to log success/failure of using Ready to Run images | `STRING` | `EXTERNAL` | |
-`ZapBBInstr` |  | `STRING` | `INTERNAL` | | REGUTIL_default
-`ZapBBInstrDir` |  | `STRING` | `EXTERNAL` | |
+`ZapBBInstr` | Specify a list of instrumented assemblies that will be used by IBC logger for profiling (a space separated list or * for all assemblies) | `STRING` | `INTERNAL` | | REGUTIL_default
+`ZapBBInstrDir` | Specify a directory where IBC data will be stored | `STRING` | `EXTERNAL` | |
 `ZapDisable` |  | `DWORD` | `EXTERNAL` | `0` |
 `ZapExclude` |  | `STRING` | `INTERNAL` | | REGUTIL_default
 `ZapLazyCOWPagesEnabled` |  | `DWORD` | `INTERNAL` | `1` |

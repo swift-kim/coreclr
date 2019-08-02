@@ -34,7 +34,7 @@ enum ReturnValues
 #define NumItems(s) (sizeof(s) / sizeof(s[0]))
 
 STDAPI CreatePDBWorker(LPCWSTR pwzAssemblyPath, LPCWSTR pwzPlatformAssembliesPaths, LPCWSTR pwzTrustedPlatformAssemblies, LPCWSTR pwzPlatformResourceRoots, LPCWSTR pwzAppPaths, LPCWSTR pwzAppNiPaths, LPCWSTR pwzPdbPath, BOOL fGeneratePDBLinesInfo, LPCWSTR pwzManagedPdbSearchPath, LPCWSTR pwzPlatformWinmdPaths, LPCWSTR pwzDiasymreaderPath);
-STDAPI NGenWorker(LPCWSTR pwzFilename, DWORD dwFlags, LPCWSTR pwzPlatformAssembliesPaths, LPCWSTR pwzTrustedPlatformAssemblies, LPCWSTR pwzPlatformResourceRoots, LPCWSTR pwzAppPaths, LPCWSTR pwzOutputFilename=NULL, SIZE_T customBaseAddress=0, LPCWSTR pwzPlatformWinmdPaths=NULL, ICorSvcLogger *pLogger = NULL, LPCWSTR pwszCLRJITPath = nullptr);
+STDAPI NGenWorker(LPCWSTR pwzFilename, DWORD dwFlags, LPCWSTR pwzPlatformAssembliesPaths, LPCWSTR pwzTrustedPlatformAssemblies, LPCWSTR pwzPlatformResourceRoots, LPCWSTR pwzAppPaths, LPCWSTR pwzOutputFilename=NULL, SIZE_T customBaseAddress=0, LPCWSTR pwzPlatformWinmdPaths=NULL, ICorSvcLogger *pLogger=NULL, LPCWSTR pwszCLRJITPath=NULL, LPCWSTR pwzIBCFile=NULL);
 void SetSvcLogger(ICorSvcLogger *pCorSvcLogger);
 void SetMscorlibPath(LPCWSTR wzSystemDirectory);
 
@@ -140,13 +140,12 @@ void PrintUsageHelper()
        W("    /MissingDependenciesOK\n")
        W("                         - Specifies that crossgen should attempt not to fail\n")
        W("                           if a dependency is missing.\n")
-#if 0
        W("    /Tuning              - Generate an instrumented image to collect\n")
        W("                           scenario traces, which can be used with ibcmerge.exe\n")
-#endif
+       W("    /DisableIBC          - Disable the use of IBC profile data\n")
+       W("    /IBCFile <file>      - Read IBC data from the specified file instead of PE resource\n")
 #if !defined(FEATURE_MERGE_JIT_AND_ENGINE)
-       W("    /JITPath <path>\n")
-       W("                         - Specifies the absolute file path to JIT compiler to be used.\n")
+       W("    /JITPath <path>      - Specifies the absolute file path to JIT compiler to be used.\n")
 #endif // !defined(FEATURE_MERGE_JIT_AND_ENGINE)
 #ifdef FEATURE_READYTORUN_COMPILER
        W("    /ReadyToRun          - Generate images resilient to the runtime and\n")
@@ -446,6 +445,7 @@ int _cdecl wmain(int argc, __in_ecount(argc) WCHAR **argv)
 #endif // !defined(FEATURE_MERGE_JIT_AND_ENGINE)
 
     LPCWSTR pwzDiasymreaderPath = nullptr;
+    LPCWSTR pwzIBCFile = nullptr;
 
     HRESULT hr;
 
@@ -512,6 +512,16 @@ int _cdecl wmain(int argc, __in_ecount(argc) WCHAR **argv)
         else if (MatchParameter(*argv, W("Tuning")))
         {
             dwFlags |= NGENWORKER_FLAGS_TUNING;
+        }
+        else if (MatchParameter(*argv, W("DisableIBC")))
+        {
+            dwFlags |= NGENWORKER_FLAGS_DISABLEIBC;
+        }
+        else if (MatchParameter(*argv, W("IBCFile")) && (argc > 1))
+        {
+            pwzIBCFile = argv[1];
+            argv++;
+            argc--;
         }
         else if (MatchParameter(*argv, W("MissingDependenciesOK")))
         {
@@ -960,13 +970,14 @@ int _cdecl wmain(int argc, __in_ecount(argc) WCHAR **argv)
          pwzAppPaths,
          pwzOutputFilename,
          baseAddress,
-         pwzPlatformWinmdPaths
+         pwzPlatformWinmdPaths,
+         NULL, // ICorSvcLogger
 #if !defined(FEATURE_MERGE_JIT_AND_ENGINE)
-        ,
-        NULL, // ICorSvcLogger
-        pwszCLRJITPath   
+         pwszCLRJITPath,
+#else // !defined(FEATURE_MERGE_JIT_AND_ENGINE)
+         NULL,
 #endif // !defined(FEATURE_MERGE_JIT_AND_ENGINE)
-         );
+         pwzIBCFile);
     }
     
 

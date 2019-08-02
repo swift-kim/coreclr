@@ -25,6 +25,7 @@ bool g_fLargeVersionBubble;
 #endif
 
 static bool s_fNGenNoMetaData;
+static bool s_fDisableIBC;
 
 /* --------------------------------------------------------------------------- *
  * Public entry points for ngen
@@ -33,8 +34,8 @@ static bool s_fNGenNoMetaData;
 // Zapper Object instead of creating one on your own.
 
 
-STDAPI NGenWorker(LPCWSTR pwzFilename, DWORD dwFlags, LPCWSTR pwzPlatformAssembliesPaths, LPCWSTR pwzTrustedPlatformAssemblies, LPCWSTR pwzPlatformResourceRoots, LPCWSTR pwzAppPaths, LPCWSTR pwzOutputFilename=NULL, SIZE_T customBaseAddress=0, LPCWSTR pwzPlatformWinmdPaths=NULL, ICorSvcLogger *pLogger = NULL, LPCWSTR pwszCLRJITPath = nullptr)
-{    
+STDAPI NGenWorker(LPCWSTR pwzFilename, DWORD dwFlags, LPCWSTR pwzPlatformAssembliesPaths, LPCWSTR pwzTrustedPlatformAssemblies, LPCWSTR pwzPlatformResourceRoots, LPCWSTR pwzAppPaths, LPCWSTR pwzOutputFilename=NULL, SIZE_T customBaseAddress=0, LPCWSTR pwzPlatformWinmdPaths=NULL, ICorSvcLogger *pLogger=NULL, LPCWSTR pwszCLRJITPath=NULL, LPCWSTR pwzIBCFile=NULL)
+{
     HRESULT hr = S_OK;
 
     BEGIN_ENTRYPOINT_NOTHROW;
@@ -77,6 +78,7 @@ STDAPI NGenWorker(LPCWSTR pwzFilename, DWORD dwFlags, LPCWSTR pwzPlatformAssembl
         ngo.fNgenLastRetry = false;
 
         s_fNGenNoMetaData = (dwFlags & NGENWORKER_FLAGS_NO_METADATA) != 0;
+        s_fDisableIBC = (dwFlags & NGENWORKER_FLAGS_DISABLEIBC) != 0;
 
         zap = Zapper::NewZapper(&ngo);
 
@@ -104,6 +106,9 @@ STDAPI NGenWorker(LPCWSTR pwzFilename, DWORD dwFlags, LPCWSTR pwzPlatformAssembl
         if (pwszCLRJITPath != nullptr)
             zap->SetCLRJITPath(pwszCLRJITPath);
 #endif // !defined(FEATURE_MERGE_JIT_AND_ENGINE)
+
+        if (pwzIBCFile != nullptr)
+            zap->SetIBCFile(pwzIBCFile);
 
         g_fNGenMissingDependenciesOk = !!(dwFlags & NGENWORKER_FLAGS_MISSINGDEPENDENCIESOK);
 
@@ -213,7 +218,7 @@ ZapperOptions::ZapperOptions() :
   m_ignoreErrors(true),
   m_statOptions(0),
   m_ngenProfileImage(false),
-  m_ignoreProfileData(false),
+  m_ignoreProfileData(s_fDisableIBC),
   m_noProcedureSplitting(false),
   m_fHasAnyProfileData(false),
   m_fPartialNGen(false),
@@ -229,11 +234,6 @@ ZapperOptions::ZapperOptions() :
     {
         delete [] m_zapSet;
         m_zapSet = NULL;
-    }
-
-    if (CLRConfig::GetConfigValue(CLRConfig::UNSUPPORTED_DisableIBC))
-    {
-        m_ignoreProfileData = true;
     }
 
     if (CLRConfig::GetConfigValue(CLRConfig::EXTERNAL_NoProcedureSplitting))
@@ -1642,6 +1642,11 @@ void Zapper::SetDontLoadJit()
     m_fDontLoadJit = true;
 }
 #endif // !defined(FEATURE_MERGE_JIT_AND_ENGINE)
+
+void Zapper::SetIBCFile(LPCWSTR pwzIBCFile)
+{
+    m_ibcFile.Set(pwzIBCFile);
+}
 
 #if !defined(NO_NGENPDB)
 void Zapper::SetDiasymreaderPath(LPCWSTR pwzDiasymreaderPath)

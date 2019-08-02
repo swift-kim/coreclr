@@ -2456,41 +2456,39 @@ HRESULT ZapImage::LocateProfileData()
         return S_FALSE;
     }
 
-    //
-    // See if there's profile data in the resource section of the PE
-    //
-    m_pRawProfileData = (BYTE*)m_ModuleDecoder.GetWin32Resource(W("PROFILE_DATA"), W("IBC"), &m_cRawProfileData);
-
-    if ((m_pRawProfileData != NULL) && (m_cRawProfileData != 0))
+    if (m_zapper->m_ibcFile.GetCount() == 0)
     {
-        m_zapper->Info(W("Found embedded profile resource in %s.\n"), m_pModuleFileName);
-        return S_OK;
+        //
+        // See if there's profile data in the resource section of the PE
+        //
+        m_pRawProfileData = (BYTE*)m_ModuleDecoder.GetWin32Resource(W("PROFILE_DATA"), W("IBC"), &m_cRawProfileData);
+
+        if ((m_pRawProfileData != NULL) && (m_cRawProfileData != 0))
+        {
+            m_zapper->Info(W("Found embedded profile resource in %s.\n"), m_pModuleFileName);
+            return S_OK;
+        }
     }
-
-    static ConfigDWORD g_UseIBCFile;
-    if (g_UseIBCFile.val(CLRConfig::EXTERNAL_UseIBCFile) != 1)
-        return S_OK;
-
-    //
-    // Couldn't find profile resource--let's see if there's an ibc file to use instead
-    //
-
-    SString path(m_pModuleFileName);
-
-    SString::Iterator dot = path.End();
-    if (path.FindBack(dot, '.'))
+    else
     {
-        SString slName(SString::Literal, "ibc");
-        path.Replace(dot+1, path.End() - (dot+1), slName);
+        //
+        // Read profile data from the specified IBC file.
+        //
+        LPCWSTR path = m_zapper->m_ibcFile.GetUnicode();
 
-        HandleHolder hFile = WszCreateFile(path.GetUnicode(),
+        HandleHolder hFile = WszCreateFile(path,
                                      GENERIC_READ,
                                      FILE_SHARE_READ,
                                      NULL,
                                      OPEN_EXISTING,
                                      FILE_ATTRIBUTE_NORMAL | FILE_FLAG_SEQUENTIAL_SCAN,
                                      NULL);
-        if (hFile != INVALID_HANDLE_VALUE)
+
+        if (hFile == INVALID_HANDLE_VALUE)
+        {
+            m_zapper->Warning(W("The profile data file %s was not found."), path);
+        }
+        else
         {
             HandleHolder hMapFile = WszCreateFileMapping(hFile, NULL, PAGE_READONLY, 0, 0, NULL);
             DWORD dwFileLen = SafeGetFileSize(hFile, 0);
@@ -2498,11 +2496,11 @@ HRESULT ZapImage::LocateProfileData()
             {
                 if (hMapFile == NULL)
                 {
-                    m_zapper->Warning(W("Found profile data file %s, but could not open it"), path.GetUnicode());
+                    m_zapper->Warning(W("Found profile data file %s, but could not open it"), path);
                 }
                 else
                 {
-                    m_zapper->Info(W("Found ibc file %s.\n"), path.GetUnicode());
+                    m_zapper->Info(W("Found ibc file %s.\n"), path);
 
                     m_profileDataFile  = (BYTE*) MapViewOfFile(hMapFile, FILE_MAP_READ, 0, 0, 0);
 
@@ -2514,14 +2512,6 @@ HRESULT ZapImage::LocateProfileData()
     }
 
     return S_OK;
-}
-
-
-bool ZapImage::CanConvertIbcData()
-{
-    static ConfigDWORD g_iConvertIbcData;
-    DWORD val = g_iConvertIbcData.val(CLRConfig::UNSUPPORTED_ConvertIbcData);
-    return (val != 0);
 }
 
 HRESULT ZapImage::parseProfileData()

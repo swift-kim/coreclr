@@ -856,7 +856,6 @@ public:
     void              LoadProfileData();
     CorProfileData *  NewProfileData();
     CorProfileData *  GetProfileData();
-    bool              CanConvertIbcData();
 
     CompileStatus     CompileProfileDataWorker(mdToken token, unsigned methodProfilingDataFlags);
 

@@ -123,6 +123,9 @@ class Zapper
     SString                 m_CLRJITPath;
     bool                    m_fDontLoadJit;
 #endif // !defined(FEATURE_MERGE_JIT_AND_ENGINE)
+
+    SString                 m_ibcFile;
+
 #if !defined(NO_NGENPDB)
     SString                 m_DiasymreaderPath;
 #endif // !defined(NO_NGENPDB)
@@ -356,6 +359,8 @@ class Zapper
     void SetCLRJITPath(LPCWSTR pwszCLRJITPath);
     void SetDontLoadJit();
 #endif // !defined(FEATURE_MERGE_JIT_AND_ENGINE)
+
+    void SetIBCFile(LPCWSTR pwzIBCFile);
 
 #if !defined(NO_NGENPDB)
     void SetDiasymreaderPath(LPCWSTR pwzDiasymreaderPath);
